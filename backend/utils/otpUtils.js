@@ -39,11 +39,33 @@ export const sendWelcomeEmail = async (user) => {
 };
 
 // Send email after faculty is approved
-export const sendFacultyApprovedEmail = async (faculty) => {
-  await transporter.sendMail({
-    from: `"AI Timetable System" <${process.env.EMAIL_USER}>`,
-    to: faculty.email,
-    subject: "Faculty Verification Approved",
-    html: `<h3>Hello ${faculty.name},</h3><p>Your faculty account has been approved by admin. You can now log in.</p>`,
-  });
+export const sendFacultyApprovedEmail = async (user) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: `"TEST MAIL" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "Faculty Account Approved",
+      html: `
+        <h2>Hello ${user.name},</h2>
+        <p>Your faculty account has been <b>approved</b> by the admin.</p>
+        <p>You can now log in and start using the platform.</p>
+        <br>
+        <p>Thank you,<br>AI Timetable Admin Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Faculty approval email sent to ${user.email}`);
+  } catch (error) {
+    console.error("❌ Failed to send faculty approval email:", error.message);
+  }
 };
+

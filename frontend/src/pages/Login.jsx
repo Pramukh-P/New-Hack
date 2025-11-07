@@ -12,16 +12,35 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const res = await loginReq(form);
-      const token = res.data.token;
-      const savedUser = JSON.parse(localStorage.getItem("user") || "null");
-      if (savedUser && savedUser.email === form.email) {
-        login({ token, userObj: savedUser });
-      } else {
-        login({ token, userObj: { name: form.email.split("@")[0], email: form.email } });
+      const { token, user: userInfo, role } = res.data;
+
+      // Determine user object (prefer backend user data)
+      const userObj =
+        userInfo || {
+          email: form.email,
+          name: form.email.split("@")[0],
+          role: role || "student",
+        };
+
+      // Store in context
+      login({ token, userObj });
+
+      // Role-based navigation
+      switch (userObj.role) {
+        case "admin":
+          navigate("/admin/dashboard");
+          break;
+        case "faculty":
+          navigate("/faculty/dashboard");
+          break;
+        case "student":
+        default:
+          navigate("/student/dashboard");
+          break;
       }
-      navigate("/");
     } catch (err) {
       alert(err?.response?.data?.message || "Login failed");
     } finally {
@@ -33,6 +52,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white p-8 rounded-md shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Login</h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
@@ -50,6 +70,7 @@ export default function Login() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-600 focus:outline-none"
           />
+
           <button
             type="submit"
             disabled={loading}

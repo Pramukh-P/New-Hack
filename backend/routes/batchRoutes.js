@@ -1,24 +1,11 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
-import {
-  createBatch,
-  getBatches,
-  addCourseToBatch,
-  getCoursesByBatch,
-  assignFaculty,
-} from "../controllers/batchController.js";
+import { createBatch, getBatches } from "../controllers/batchController.js";
 
 const router = express.Router();
 
-router.route("/")
-  .get(protect, adminOnly, getBatches)
-  .post(protect, adminOnly, createBatch);
-
-router.route("/:batchId/courses")
-  .get(protect, adminOnly, getCoursesByBatch)
-  .post(protect, adminOnly, addCourseToBatch);
-
-router.route("/course/:courseId/assign")
-  .post(protect, adminOnly, assignFaculty);
+// 🟢 Optional: still allow admin to create or view custom batches if needed
+router.post("/", protect, adminOnly, createBatch);
+router.get("/", protect, adminOnly, getBatches);
 
 export default router;

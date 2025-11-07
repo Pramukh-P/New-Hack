@@ -1,19 +1,60 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import {
+  // Admin routes
   createStudent,
   getStudents,
   updateStudent,
   deleteStudent,
+
+  // Student routes
+  registerStudent,
+  getStudentProfile,
+  updateStudentProfile,
+
+  // Student activities
+  addProject,
+  updateProject,
+  deleteProject,
+  addInternship,
 } from "../controllers/studentController.js";
 
 const router = express.Router();
 
-router.route("/")
+/* ============================================================
+   🎓 STUDENT ROUTES (Self-Service)
+   ============================================================ */
+
+// 📝 Register as a student (after account login)
+router.post("/register", protect, registerStudent);
+
+// 👤 Get or update personal student profile
+router
+  .route("/profile")
+  .get(protect, getStudentProfile)
+  .put(protect, updateStudentProfile);
+
+// 💼 Manage Projects
+router.post("/projects", protect, addProject);
+router.put("/projects/:projectId", protect, updateProject);
+router.delete("/projects/:projectId", protect, deleteProject);
+
+// 🧠 Manage Internships
+router.post("/internships", protect, addInternship);
+
+/* ============================================================
+   🧑‍💼 ADMIN ROUTES
+   ============================================================ */
+
+// 👩‍💻 Get all students / Create a new student record
+router
+  .route("/")
   .get(protect, getStudents)
   .post(protect, adminOnly, createStudent);
 
-router.route("/:id")
+// ✏️ Update or Delete a specific student
+router
+  .route("/:id")
   .put(protect, adminOnly, updateStudent)
   .delete(protect, adminOnly, deleteStudent);
 

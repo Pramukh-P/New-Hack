@@ -1,35 +1,30 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
-
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user"); // our workaround to have name
+    const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
 
   useEffect(() => {
     if (token) {
       localStorage.setItem("token", token);
-      // try decode to get id if needed
-      try {
-        const decoded = jwtDecode(token);
-        // you can store id if needed: decoded.id
-      } catch (e) {}
     } else {
       localStorage.removeItem("token");
     }
   }, [token]);
 
-  const login = ({ token, userObj }) => {
-    setToken(token);
-    if (userObj) {
-      setUser(userObj);
-      localStorage.setItem("user", JSON.stringify(userObj));
+  const login = ({ token: newToken, userObj, role }) => {
+    setToken(newToken);
+    // store role inside the user object too
+    const toSave = userObj ? { ...userObj, role: role || userObj.role } : null;
+    if (toSave) {
+      setUser(toSave);
+      localStorage.setItem("user", JSON.stringify(toSave));
     }
   };
 

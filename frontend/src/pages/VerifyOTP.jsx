@@ -11,12 +11,26 @@ export default function VerifyOTP() {
   const handleVerify = async (e) => {
     e.preventDefault();
     if (!pending) return alert("No signup data found. Please sign up first.");
+
     setLoading(true);
     try {
-      await verifyOTP({ email: pending.email, otp });
+      // Send OTP for verification
+      const response = await verifyOTP({ email: pending.email, otp });
+
+      // Save user data locally for future login
       localStorage.setItem("user", JSON.stringify(pending));
       localStorage.removeItem("pendingUser");
-      alert("OTP verified successfully. You can now login.");
+
+      // Show backend message
+      const message = response.data.message || "OTP verified successfully.";
+      alert(message);
+
+      // Special note for faculty
+      if (pending.role === "faculty") {
+        alert("Please wait for admin approval before you can login.");
+      }
+
+      // Navigate to login
       navigate("/login");
     } catch (err) {
       alert(err?.response?.data?.message || "Verification failed");
@@ -30,8 +44,9 @@ export default function VerifyOTP() {
       <div className="bg-white p-8 rounded-md shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Verify OTP</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Enter the OTP sent to {pending?.email || "your email"}
+          Enter the OTP sent to <span className="font-medium">{pending?.email || "your email"}</span>
         </p>
+
         <form onSubmit={handleVerify} className="space-y-4">
           <input
             type="text"

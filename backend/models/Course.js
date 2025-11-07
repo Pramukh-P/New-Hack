@@ -1,13 +1,60 @@
 import mongoose from "mongoose";
 
-const courseSchema = new mongoose.Schema({
-  batch: { type: mongoose.Schema.Types.ObjectId, ref: "Batch", required: true }, // ✅ new
-  code: { type: String, required: true },
-  title: { type: String, required: true },
-  credits: { type: Number, required: true },
-  total_hours: { type: Number, required: true },
-  assigned_faculty: { type: mongoose.Schema.Types.ObjectId, ref: "Faculty" },
-  created_at: { type: Date, default: Date.now },
-});
+const courseSchema = new mongoose.Schema(
+  {
+    // 🔗 Linked Batch
+    batch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Batch",
+      required: true,
+    },
+
+    // 🧾 Course Information
+    code: {
+      type: String,
+      required: true,
+      trim: true,
+      uppercase: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    credits: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    total_hours: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    // 🏷️ Course Category
+    category: {
+      type: String,
+      enum: ["major", "minor", "optional"],
+      required: true,
+    },
+
+    // 👨‍🏫 Faculty Assignment
+    assigned_faculty: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Faculty",
+      default: null,
+    },
+
+    // 📅 Creation Timestamp
+    created_at: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    timestamps: true, // adds createdAt and updatedAt automatically
+  }
+);
 
 export default mongoose.model("Course", courseSchema);

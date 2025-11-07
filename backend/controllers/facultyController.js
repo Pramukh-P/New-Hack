@@ -11,9 +11,16 @@ export const createFaculty = async (req, res) => {
 
 export const getFaculty = async (req, res) => {
   try {
-    const faculty = await Faculty.find().populate("user_id", "name email");
-    res.json(faculty);
+    const faculty = await Faculty.find()
+      .populate("user_id", "name email isApproved")
+      .lean();
+
+    // only show approved faculty
+    const visible = faculty.filter((f) => f.user_id && f.user_id.isApproved === true);
+
+    res.json(visible);
   } catch (err) {
+    console.error("Get faculty error:", err);
     res.status(500).json({ message: err.message });
   }
 };
